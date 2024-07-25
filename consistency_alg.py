@@ -73,7 +73,10 @@ class Arc_Consistency_Algorithm:
     def revise(self, Xi, Xj):
         revised = False
         for x in set(self.domains[Xi]):
-            if all(x == y for y in self.domains[Xj]):
+            if not any(self.satisfies_constraint(x, y) for y in self.domains[Xj]):
                 self.domains[Xi].remove(x)
                 revised = True
         return revised
+
+    def satisfies_constraint(self, x, y):
+        return x != y
