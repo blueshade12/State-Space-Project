@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
-from SudokuReader import Sudoku_reader
-
+from sudoku_reader import Sudoku_reader
+from consistency_alg import Arc_Consistency_Algorithm
+from backtracking_alg import Backtracking_Algorithm
 
 class Constraint(ABC):
     @abstractmethod
@@ -8,16 +9,20 @@ class Constraint(ABC):
         pass
 
 class SudokuConstraint(Constraint):
-    def __init__(self):
+    def __init__(self, algorithm_cls):
         self.path = input("Please input the filepath of the sudoku file: ")
         self.reader = Sudoku_reader()
-        self.solved_puzzle = self.run_algorithm()
+        self.algorithm_cls = algorithm_cls
 
     def run_algorithm(self):
         puzzle = self.reader.sudoku_reader(self.path)
-        from Backtracking import Backtracking_Algorithm
-        alg = Backtracking_Algorithm(puzzle)
+        alg = self.algorithm_cls(puzzle)  # Instantiate the selected algorithm
         return alg.run()
 
-sudoku_constraint = SudokuConstraint()
-print(sudoku_constraint.solved_puzzle)
+# To use Arc Consistency Algorithm
+sudoku_constraint = SudokuConstraint(Arc_Consistency_Algorithm)
+print(sudoku_constraint.run_algorithm())
+
+# To use Backtracking Algorithm, uncomment the following lines:
+# sudoku_constraint = SudokuConstraint(Backtracking_Algorithm)
+# print(sudoku_constraint.run_algorithm())
