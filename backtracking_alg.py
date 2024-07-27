@@ -1,27 +1,26 @@
-from typing import Generic, TypeVar, List, Dict
+from typing import List, Dict, Optional
+from constraint_classes import CSP, SudokuConstraint
 
-VariableT = TypeVar("VariableT")
-AssignmentT = Dict[VariableT, int]
+class Backtracking_Algorithm:
+    def __init__(self, puzzle: List[List[int]]) -> None:
+        self.puzzle = puzzle
+        self.variables = [(row, col) for row in range(9) for col in range(9)]
+        self.domains = {(row, col): list(range(1, 10)) if puzzle[row][col] == 0 else [puzzle[row][col]] for row in range(9) for col in range(9)}
+        self.csp = CSP(self.variables, self.domains)
+        self.csp.add_constraint(SudokuConstraint())
 
-class Backtracking_Algorithm(Generic[VariableT]):
-    def __init__(self, csp: VariableT) -> None:
-        self.csp = csp
-
-    def run(self) -> AssignmentT:
-       return self.backtracking_search()
-       """
-        if self.backtrack():
-            return self.backtracking_search()
-        else:
+    def run(self) -> Optional[List[List[int]]]:
+        assignment = {(row, col): self.puzzle[row][col] for row in range(9) for col in range(9) if self.puzzle[row][col] != 0}
+        result = self.backtrack(assignment)
+        if result is None:
             return None
-       
-        """
+        else:
+            for row in range(9):
+                for col in range(9):
+                    self.puzzle[row][col] = result[(row, col)]
+            return self.puzzle
 
-    def backtracking_search(self) -> AssignmentT:
-        empty_assignment = {}
-        return self.backtrack(empty_assignment)
-
-    def backtrack(self, assignment: AssignmentT) -> AssignmentT:
+    def backtrack(self, assignment: Dict[tuple[int, int], int]) -> Optional[Dict[tuple[int, int], int]]:
         if self.csp.complete(assignment):
             return assignment
 
@@ -35,6 +34,6 @@ class Backtracking_Algorithm(Generic[VariableT]):
                 del assignment[variable]
         return None
 
-    def select_unassigned_variable(self, assignment: Dict[VariableT, int]) -> VariableT:
+    def select_unassigned_variable(self, assignment: Dict[tuple[int, int], int]) -> tuple[int, int]:
         unassigned = [v for v in self.csp.variables if v not in assignment]
         return min(unassigned, key=lambda var: len(self.csp.domains[var]))
