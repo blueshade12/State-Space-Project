@@ -1,12 +1,27 @@
-class BacktrackingAlgorithm(Generic[VariableT]):
-    def __init__(self, csp: CSP[VariableT]) -> None:
+from typing import Generic, TypeVar, List, Dict
+
+VariableT = TypeVar("VariableT")
+AssignmentT = Dict[VariableT, int]
+
+class Backtracking_Algorithm(Generic[VariableT]):
+    def __init__(self, csp: VariableT) -> None:
         self.csp = csp
 
-    def backtracking_search(self) -> Dict[VariableT, int]:
+    def run(self) -> AssignmentT:
+       return self.backtracking_search()
+       """
+        if self.backtrack():
+            return self.backtracking_search()
+        else:
+            return None
+       
+        """
+
+    def backtracking_search(self) -> AssignmentT:
         empty_assignment = {}
         return self.backtrack(empty_assignment)
 
-    def backtrack(self, assignment: Dict[VariableT, int]) -> Dict[VariableT, int]:
+    def backtrack(self, assignment: AssignmentT) -> AssignmentT:
         if self.csp.complete(assignment):
             return assignment
 
@@ -23,17 +38,3 @@ class BacktrackingAlgorithm(Generic[VariableT]):
     def select_unassigned_variable(self, assignment: Dict[VariableT, int]) -> VariableT:
         unassigned = [v for v in self.csp.variables if v not in assignment]
         return min(unassigned, key=lambda var: len(self.csp.domains[var]))
-
-    def setup_sudoku(puzzle: str) -> Tuple[List[Tuple[int, int]], Dict[Tuple[int, int], Set[int]], Dict[Tuple[int, int], int]]:
-      variables = [(r, c) for r in range(9) for c in range(9)]
-      domains = {var: set(range(1, 10)) for var in variables}
-      initial_assignment = {}
-
-      for r in range(9):
-          for c in range(9):
-              value = int(puzzle[r * 9 + c])
-              if value != 0:
-                  initial_assignment[(r, c)] = value
-                  domains[(r, c)] = {value}
-
-      return variables, domains, initial_assignment
