@@ -1,39 +1,35 @@
-from typing import List, Dict, Optional
-from constraint_classes import CSP, SudokuConstraint
+from csp_types import VariableT, AssignmentT
+from csp import CSP
+import pandas as pd
 
-class Backtracking_Algorithm:
-    def __init__(self, puzzle: List[List[int]]) -> None:
-        self.puzzle = puzzle
-        self.variables = [(row, col) for row in range(9) for col in range(9)]
-        self.domains = {(row, col): list(range(1, 10)) if puzzle[row][col] == 0 else [puzzle[row][col]] for row in range(9) for col in range(9)}
-        self.csp = CSP(self.variables, self.domains)
-        self.csp.add_constraint(SudokuConstraint())
+class BackTrackingAlgorithm:
+    def __init__(self, puzzle):
+        self.puzzle = pd.DataFrame(puzzle)
 
-    def run(self) -> Optional[List[List[int]]]:
-        assignment = {(row, col): self.puzzle[row][col] for row in range(9) for col in range(9) if self.puzzle[row][col] != 0}
-        result = self.backtrack(assignment)
-        if result is None:
-            return None
-        else:
-            for row in range(9):
-                for col in range(9):
-                    self.puzzle[row][col] = result[(row, col)]
-            return self.puzzle
+    def run(self):
+        return self.backtracking_search(self.puzzle)
 
-    def backtrack(self, assignment: Dict[tuple[int, int], int]) -> Optional[Dict[tuple[int, int], int]]:
-        if self.csp.complete(assignment):
+    def backtracking_search(self, csp):
+        empty_assignment = dict()
+        return self.backtrack(csp, empty_assignment)
+
+    def backtrack(self, csp, assignment):
+        if csp.complete(assignment):
             return assignment
-
-        variable = self.select_unassigned_variable(assignment)
-        for value in self.csp.domains[variable]:
-            if self.csp.consistent(variable, {**assignment, variable: value}):
-                assignment[variable] = value
-                result = self.backtrack(assignment)
+        
+        unassigned_variable = [v for v in csp.variables if v not in assignment]
+        if not unassigned_variable:
+            return None
+        
+        variable = unassigned_variable[0]
+        
+        for value in csp.domains(variable):
+            assignment[variable] = value
+            if csp.consistent(variable, assignment):
+                result = self.backtrack(csp, assignment)
                 if result is not None:
                     return result
-                del assignment[variable]
+                
+            del assignment[variable]
+        
         return None
-
-    def select_unassigned_variable(self, assignment: Dict[tuple[int, int], int]) -> tuple[int, int]:
-        unassigned = [v for v in self.csp.variables if v not in assignment]
-        return min(unassigned, key=lambda var: len(self.csp.domains[var]))
