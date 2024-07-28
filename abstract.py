@@ -9,7 +9,7 @@ class Abstract:
 
     def run_algorithm(self):
         puzzle = self.reader.sudoku_reader(self.path)  
-        alg = consistency_alg.Arc_Consistency_Algorithm(puzzle)  
+        alg = consistency_alg.Arc_Consistency_Algorithm(puzzle) # replace with backtracking_alg.BacktrackingAlgorithm(puzzle) to test that algorithm
         return alg.run()
 
 abstract = Abstract()
