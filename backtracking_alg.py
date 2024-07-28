@@ -2,6 +2,7 @@ from csp_types import VariableT, AssignmentT
 from csp import CSP
 import pandas as pd
 
+
 class BackTrackingAlgorithm:
     def __init__(self, puzzle):
         self.puzzle = pd.DataFrame(puzzle)
@@ -14,7 +15,7 @@ class BackTrackingAlgorithm:
         return self.backtrack(csp, empty_assignment)
 
     def backtrack(self, csp, assignment):
-        if csp.complete(assignment):
+        if len(assignment) == len(csp.variables):
             return assignment
         
         unassigned_variable = [v for v in csp.variables if v not in assignment]
@@ -29,6 +30,10 @@ class BackTrackingAlgorithm:
                 result = self.backtrack(csp, assignment)
                 if result is not None:
                     return result
+                
+            del assignment[variable]
+        
+        return None
                 
             del assignment[variable]
         
