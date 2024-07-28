@@ -1,28 +1,33 @@
-from typing import Generic, TypeVar, List, Dict, Set
-from abstract_class import Constraint
+from typing import Generic
 
-VariableT = TypeVar("VariableT")
-AssignmentT = Dict[VariableT, int]
+from csp_types import VariableT, AssignmentT
+from constraint import Constraint
 
 
 class CSP(Generic[VariableT]):
-    def __init__(self, variables: List[VariableT], domains: Dict[VariableT, Set[int]]) -> None:
+    def __init__(self, variables: list[VariableT], domains: dict[VariableT, set]):
         self.variables = variables
         self.domains = domains
-        self.constraints: Dict[VariableT, List[Constraint]] = {v: [] for v in self.variables}
+        self.constraints: dict[VariableT, list[Constraint[VariableT]]] = {v: [] for v in self.variables}
 
-    def add_constraint(self, constraint: Constraint):
+    def add_constraint(self, constraint: Constraint[VariableT]):
         for variable in constraint.scope:
-            if variable not in self.variables:
-                raise ValueError
+            assert variable in self.variables
+
             self.constraints[variable].append(constraint)
 
     def consistent(self, variable: VariableT, assignment: AssignmentT) -> bool:
+        assert variable in self.variables, f"Expected to find variable {variable}!"
+
         for constraint in self.constraints[variable]:
             if not constraint.satisfied(assignment):
                 return False
+
         return True
 
     def complete(self, assignment: AssignmentT) -> bool:
-        return all(variable in assignment for variable in self.variables)
-    
+        for variable in self.variables:
+            if variable not in assignment.keys():
+                return False
+
+        return True
