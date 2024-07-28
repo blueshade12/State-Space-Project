@@ -34,7 +34,3 @@ class BackTrackingAlgorithm:
             del assignment[variable]
         
         return None
-                
-            del assignment[variable]
-        
-        return None
